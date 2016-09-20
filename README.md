@@ -20,7 +20,7 @@ Configure sshd by setting the AuthorizedKeysCommand-option as described here:
     # chmod 640 /etc/ssh/ldap_password
     # echo <the password> > /etc/ssh/ldap_password
     #
-    AuthorizedKeysCommand /usr/local/sbin/sintefauthkeys
+    AuthorizedKeysCommand /usr/local/sbin/ldapauthkeys
  
     AuthorizedKeysCommandUser sshd
 
