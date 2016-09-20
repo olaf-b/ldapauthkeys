@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+# run possibly multiple searches by command grouping.
+# { getcerts $1 & some_other_cert_fetch_command $1 ; } | ldifcerts2pem ...
+ 
+getcerts "$1" | ldifcert2pem | pem2ssh /etc/openldap/certs/your_trusted_ca_budle.pem

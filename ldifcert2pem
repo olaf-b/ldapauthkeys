@@ -1,0 +1,34 @@
+#!/usr/bin/awk -f
+#
+# Convert "userCertificate" fields from ldif format to a PEM certificate bundle.
+# Usage: ldifcert2pem < certquery.ldif
+#
+# Author: Olaf Trygve Berglihn <olaf@berglihn.net>
+# Date: 2016-03-06
+#
+BEGIN {
+        ncerts = 0
+        endcerts = 0
+}
+{
+        if ( $0 ~ /^userCertificate:: /) {
+                if (ncerts > 0) {
+                        print "-----END CERTIFICATE-----"
+                }
+                ncerts++
+                print "-----BEGIN CERTIFICATE-----"
+                sub(/^userCertificate:: /,"", $0)
+                print $0
+        } else {
+                if (ncerts > 0 && endcerts == 0) {
+                        if (NF == 0) {
+                                endcerts = 1
+                                print "-----END CERTIFICATE-----"
+                        } else {               
+                                sub(/^ /, "")
+                                print
+                        }
+                }
+        }
+}
+

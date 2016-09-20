@@ -1,0 +1,24 @@
+#!/usr/bin/bash
+# getcerts
+# Look up userCertificate from sintef.no Active Directory ldap service.
+# Usage: getcerts <username to search>
+#
+# You will need to place the ldap DN to bind to in /etc/ssh/ldap_user
+# and the corresponding password in /etc/ssh/ldap_password
+# Make sure that the ldap_password is only readable for root and the sshd-group.
+# The ldap DN will typically be like this: CN=Service Account Name,OU=Service Accounts,OU=Admin,OU=Company,DC=company,DC=tld
+#
+# Author: Olaf Trygve Berglihn <olaf@berglihn.net>
+# Date: 2016-05-20
+#
+ldappw="$(cat /etc/ssh/ldap_password)"
+ldapuser="$(cat /etc/ssh/ldap_user)"
+user="$1"
+ldaphost=adserver.tld
+ldapbasedn="dc=company,dc=tld"
+ldapsearch -x -D "${ldapuser}" \
+        -ZZ -h "${ldaphost}" -b "${ldapbasedn}" \
+        -w "${ldappw}" \
+        "(&(objectClass=user)(|(sAMAccountName=${user})(userPrincipalName=${user})))" \
+        userCertificate
+

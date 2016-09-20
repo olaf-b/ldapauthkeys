@@ -1,0 +1,29 @@
+#!/usr/bin/bash
+# Parse multiple PEM-encoded X.509 certificates and convert them to ssh public keys
+# for inclusion in $HOME/.ssh/authorized_keys
+# Usage: pem2ssh CAs.pem < bundle.pem
+# The CAs.pem contains the concatenated CA certificates used to validate the validity of the
+# user certificate.  Only certificates that have the client authentication capability will be accepted.
+#
+# Author: Olaf Trygve Berglihn <olaf@berglihn.net>
+# Date: 2016-03-06
+#
+CAs=$1
+while read line
+do
+    if [ "${line//END CERTIFICATE}" != "$line" ]; then
+        buf="$buf$line\n"
+         
+        # Check that certificate are valid and not expired.
+        printf -- "$buf" | openssl verify -CAfile ${CAs} -purpose sslclient | grep -q '^error '
+       verify_passed=$?
+        # If no error message found in validation, grep returns exit 1, continue export.
+        if [ ${verify_passed} -eq 1 ]; then
+                printf -- "$buf" | openssl x509 -noout -pubkey | ssh-keygen -i -m PKCS8 -f /dev/stdin
+        fi
+        buf=""
+    else
+        buf="$buf$line\n"
+    fi
+done
+
